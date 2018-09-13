@@ -1,8 +1,10 @@
+
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8" />
-<title>spatial_join_in_R</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<title>spatial_join_in_R</title><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
     /*!
@@ -11766,7 +11768,289 @@ div#notebook {
         }
     });
     </script>
-    <!-- End of mathjax configuration --></head>
+    <!-- End of mathjax configuration -->
+
+
+<style type="text/css">
+
+.rendered_html table {
+   padding: 0;
+   border-collapse: collapse;
+   border: none;
+ }
+.rendered_html thead {
+  border: none;
+  border-bottom: 1px solid black;
+}
+
+.rendered_html table tr {
+   border: none;
+   background-color: white;
+   margin: 0;
+   padding: 0;
+ }
+
+.rendered_html table tr:nth-child(2n) {
+   background-color: #f8f8f8;
+}
+
+.rendered_html table tr th {
+   font-weight: bold;
+   border: none;
+   margin: 0;
+   padding: 6px 13px;
+}
+
+.rendered_html table tr td {
+   border: none;
+   margin: 0;
+   padding: 6px 13px;
+}
+
+ .rendered_html tbody tr:hover {
+   background-color: #eeeeea;
+ }
+
+.rendered_html table tr th :first-child, table tr td :first-child {
+   margin-top: 0;
+ }
+
+.rendered_html table tr th :last-child, table tr td :last-child {
+   margin-bottom: 0;
+ }
+
+.sos_hint {
+  color: rgba(0,0,0,.4);
+  font-family: monospace;
+}
+
+
+.cm-sos-interpolated {
+  background-color: #EDD5F3;
+}
+
+.cm-sos-sigil {
+  background-color: #EDD5F3;
+}
+
+
+pre.section-header.CodeMirror-line {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  background-color: #f7f7f7;
+  /* border-top: 1px solid #ddd; */
+}
+
+.code_cell .cm-header-1,
+.code_cell .cm-header-2,
+.code_cell .cm-header-3,
+.code_cell .cm-header-4,
+.code_cell .cm-header-5,
+.code_cell .cm-header-6
+{
+    font-size: 100%;
+    font-style: normal;
+    font-weight: normal;
+    font-family: monospace;
+}
+
+
+
+div.cell {
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: vertical;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border-radius: 2px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  width: 100%;
+  padding: 5px;
+  /* This acts as a spacer between cells, that is outside the border */
+  margin: 0px;
+  outline: none;
+  position: relative;
+  overflow: visible;
+}
+
+
+</style>
+
+
+
+
+
+
+<style type="text/css">
+.dataframe_container {
+   max-height: 400px;
+}
+
+.dataframe_input {
+    border: 1px solid #ddd;
+    margin-bottom: 5px;
+}
+
+.scatterplot_by_rowname div.xAxis div.tickLabel {
+    transform: translateY(15px) translateX(15px) rotate(45deg);
+    -ms-transform: translateY(15px) translateX(15px) rotate(45deg);
+    -moz-transform: translateY(15px) translateX(15px) rotate(45deg);
+    -webkit-transform: translateY(15px) translateX(15px) rotate(45deg);
+    -o-transform: translateY(15px) translateX(15px) rotate(45deg);
+    /*rotation-point:50% 50%;*/
+    /*rotation:270deg;*/
+}
+
+.sos_dataframe td, .sos_dataframe th, .sos_dataframe tr {
+    white-space: nowrap;
+    border: none;
+}
+
+.sos_dataframe tr:hover {
+    background-color: #e6f2ff;
+}
+</style>
+
+
+<style>
+   .lan_Bash .input_prompt {
+      background-color: #E6EEFF !important;
+    }.lan_R .input_prompt {
+      background-color: #DCDCDA !important;
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-1.7.2.min.js"
+  integrity="sha256-R7aNzoy2gFrVs+pNJ6+SokH04ppcEqJ0yFLkNGoFALQ="
+  crossorigin="anonymous">
+</script>
+
+<script>
+function filterDataFrame(id) {
+    var input = document.getElementById("search_" + id);
+    var filter = input.value.toUpperCase();
+    var table = document.getElementById("dataframe_" + id);
+    var tr = table.getElementsByTagName("tr");
+
+    // Loop through all table rows, and hide those who don't match the search query
+    for (var i = 1; i < tr.length; i++) {
+        for (var j = 0; j < tr[i].cells.length; ++j) {
+            var matched = false;
+            if (tr[i].cells[j].innerHTML.toUpperCase().indexOf(filter) != -1) {
+                tr[i].style.display = "";
+                matched = true
+                break;
+            }
+            if (!matched)
+                tr[i].style.display = "none";
+        }
+    }
+}
+
+function sortDataFrame(id, n, dtype) {
+    var table = document.getElementById("dataframe_" + id);
+
+    var tb = table.tBodies[0]; // use `<tbody>` to ignore `<thead>` and `<tfoot>` rows
+    var tr = Array.prototype.slice.call(tb.rows, 0); // put rows into array
+
+    if (dtype === 'numeric') {
+        var fn = function(a, b) {
+            return parseFloat(a.cells[n].textContent) <= parseFloat(b.cells[n].textContent) ? -1 : 1;
+        }
+    } else {
+        var fn = function(a, b) {
+            var c = a.cells[n].textContent.trim().localeCompare(b.cells[n].textContent.trim());
+            return c > 0 ? 1 : (c < 0 ? -1 : 0) }
+    }
+    var isSorted = function(array, fn) {
+        if (array.length < 2)
+            return 1;
+        var direction = fn(array[0], array[1]);
+        for (var i = 1; i < array.length - 1; ++i) {
+            var d = fn(array[i], array[i+1]);
+            if (d == 0)
+                continue;
+            else if (direction == 0)
+                direction = d;
+            else if (direction != d)
+                return 0;
+            }
+        return direction;
+    }
+
+    var sorted = isSorted(tr, fn);
+
+    if (sorted == 1 || sorted == -1) {
+        // if sorted already, reverse it
+        for(var i = tr.length - 1; i >= 0; --i)
+            tb.appendChild(tr[i]); // append each row in order
+    } else {
+        tr = tr.sort(fn);
+        for(var i = 0; i < tr.length; ++i)
+            tb.appendChild(tr[i]); // append each row in order
+    }
+}
+
+</script>
+
+
+
+
+
+
+
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.css">
+
+<style type="text/css">
+
+.inner_cell .CodeMirror {
+    height: auto;
+}
+
+.cell-kernel-selector {
+  width:70pt;
+  background: none;
+  z-index: 1000;
+  position: absolute;
+  height: 1.7em;
+  margin-top: 3pt;
+  right: 8pt;
+  font-size: 80%;
+}
+textarea.sos-source {
+  line-height: 1.21429em;
+  font-size: 14px;
+  background: none;
+  width: 100%;
+  border: none;
+  font-family: monospace;
+  height: auto;
+  padding: 4px;
+  outline: none;
+  position: relative;
+  resize: none;
+  overflow: hidden;
+  vertical-align: text-top;
+}
+</style>
+
+</head>
+
 <body>
   <div tabindex="-1" id="notebook" class="border-box-sizing">
     <div class="container" id="notebook-container">
@@ -11802,23 +12086,25 @@ div#notebook {
 </div>
 </div>
 </div>
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="n">library</span><span class="p">(</span><span class="s2">&quot;sp&quot;</span><span class="p">)</span>
-<span class="n">library</span><span class="p">(</span><span class="s2">&quot;rgdal&quot;</span><span class="p">)</span>
-<span class="n">library</span><span class="p">(</span><span class="s2">&quot;dplyr&quot;</span><span class="p">)</span>
-<span class="n">library</span><span class="p">(</span><span class="s2">&quot;tidyr&quot;</span><span class="p">)</span>
-<span class="n">library</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span>
-<span class="n">library</span><span class="p">(</span><span class="s2">&quot;data.table&quot;</span><span class="p">)</span>
-<span class="n">library</span><span class="p">(</span><span class="s2">&quot;ggplot2&quot;</span><span class="p">)</span>
-<span class="n">library</span><span class="p">(</span><span class="s2">&quot;broom&quot;</span><span class="p">)</span>
-</pre></div>
+<div class="prompt input_prompt">In&nbsp;[1]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 10.81432em">
+   <textarea rows="8"
+      class="sos-source" name="R">library("sp")
+library("rgdal")
+library("dplyr")
+library("tidyr")
+library("raster")
+library("data.table")
+library("ggplot2")
+library("broom")</textarea>
+  </div>
+</div>
 
-</div>
-</div>
 </div>
 
 <div class="output_wrapper">
@@ -11880,6 +12166,9 @@ The following objects are masked from ‘package:dplyr’:
 </div>
 
 </div>
+</div>
+
+
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -11897,20 +12186,22 @@ The following objects are masked from ‘package:dplyr’:
 </div>
 </div>
 </div>
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="c1"># shape file, which contains information for polygon</span>
-<span class="n">NC2010Trt</span> <span class="o">&lt;-</span> <span class="n">rgdal</span><span class="p">::</span><span class="n">readOGR</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> 
-                     <span class="n">layer</span> <span class="o">=</span> <span class="s2">&quot;2010_Census_trct&quot;</span><span class="p">)</span>
-<span class="c1"># extract the Coordinate Reference Systems</span>
-<span class="n">NC2010Trt</span><span class="o">.</span><span class="n">crs</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">CRS</span><span class="p">(</span><span class="n">sp</span><span class="p">::</span><span class="n">proj4string</span><span class="p">(</span><span class="n">NC2010Trt</span><span class="p">))</span>
-</pre></div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 7.17145em">
+   <textarea rows="5"
+      class="sos-source" name="R"># shape file, which contains information for polygon
+NC2010Trt <- rgdal::readOGR(".", 
+                     layer = "2010_Census_trct")
+# extract the Coordinate Reference Systems
+NC2010Trt.crs <- sp::CRS(sp::proj4string(NC2010Trt))</textarea>
+  </div>
+</div>
 
-</div>
-</div>
 </div>
 
 <div class="output_wrapper">
@@ -11936,6 +12227,9 @@ Integer64 fields read as strings:  ALAND10 AWATER10
 </div>
 
 </div>
+</div>
+
+
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -11947,24 +12241,27 @@ Integer64 fields read as strings:  ALAND10 AWATER10
 </div>
 </div>
 </div>
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="c1"># convert a spatial object into data.frame</span>
-<span class="n">NC2010Trt</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">broom</span><span class="p">::</span><span class="n">tidy</span><span class="p">(</span><span class="n">NC2010Trt</span><span class="p">)</span>
+<div class="prompt input_prompt">In&nbsp;[3]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 12.02861em">
+   <textarea rows="9"
+      class="sos-source" name="R"># convert a spatial object into data.frame
+NC2010Trt.points = broom::tidy(NC2010Trt)
 
-<span class="n">map_NC2010_trt</span> <span class="o">&lt;-</span> <span class="n">ggplot</span><span class="p">()</span> <span class="o">+</span> 
-  <span class="c1">#geom_polygon() +</span>
-  <span class="n">geom_path</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">NC2010Trt</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">aes</span><span class="p">(</span><span class="nb">long</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span> <span class="o">+</span>
-  <span class="n">coord_equal</span><span class="p">()</span> 
+map_NC2010_trt <- ggplot() + 
+  #geom_polygon() +
+  geom_path(data=NC2010Trt.points, aes(long,lat,group=group), color="black") +
+  coord_equal() 
 
-<span class="n">map_NC2010_trt</span>
-</pre></div>
-
+map_NC2010_trt
+</textarea>
+  </div>
 </div>
-</div>
+
 </div>
 
 <div class="output_wrapper">
@@ -14333,6 +14630,9 @@ AABJRU5ErkJggg=="
 </div>
 
 </div>
+</div>
+
+
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -14342,16 +14642,18 @@ AABJRU5ErkJggg=="
 </div>
 </div>
 </div>
+
+<div class="lan_Bash">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="n">head</span> <span class="n">CenPop2010_Mean_TR37</span><span class="o">.</span><span class="n">txt</span>
-</pre></div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 2.31429em">
+   <textarea rows="1"
+      class="sos-source" name="Bash">head CenPop2010_Mean_TR37.txt</textarea>
+  </div>
+</div>
 
-</div>
-</div>
 </div>
 
 <div class="output_wrapper">
@@ -14382,16 +14684,21 @@ AABJRU5ErkJggg=="
 </div>
 
 </div>
+</div>
+
+
+
+<div class="lan_Bash">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="n">head</span> <span class="n">list_station_NC_surrounding</span><span class="o">.</span><span class="n">csv</span>
-</pre></div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 2.31429em">
+   <textarea rows="1"
+      class="sos-source" name="Bash">head list_station_NC_surrounding.csv</textarea>
+  </div>
+</div>
 
-</div>
-</div>
 </div>
 
 <div class="output_wrapper">
@@ -14422,31 +14729,41 @@ AABJRU5ErkJggg=="
 </div>
 
 </div>
+</div>
+
+
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="c1"># population Centroid</span>
-<span class="n">NC_cen_cty</span> <span class="o">&lt;-</span> <span class="n">data</span><span class="o">.</span><span class="n">table</span><span class="p">::</span><span class="n">fread</span><span class="p">(</span><span class="s2">&quot;CenPop2010_Mean_TR37.txt&quot;</span><span class="p">,</span> 
-                                <span class="n">colClasses</span> <span class="o">=</span> <span class="n">c</span><span class="p">(</span><span class="n">STATEFP</span> <span class="o">=</span> <span class="s2">&quot;character&quot;</span><span class="p">,</span> 
-                                               <span class="n">COUNTYFP</span> <span class="o">=</span> <span class="s2">&quot;character&quot;</span><span class="p">,</span> 
-                                               <span class="n">TRACTCE</span> <span class="o">=</span> <span class="s2">&quot;character&quot;</span><span class="p">))</span>
+<div class="prompt input_prompt">In&nbsp;[5]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 18.100060000000003em">
+   <textarea rows="14"
+      class="sos-source" name="R"># population Centroid
+NC_cen_cty <- data.table::fread("CenPop2010_Mean_TR37.txt", 
+                                colClasses = c(STATEFP = "character", 
+                                               COUNTYFP = "character", 
+                                               TRACTCE = "character"))
 
-<span class="c1"># list of weather station in NC</span>
-<span class="n">NC_station</span> <span class="o">&lt;-</span> <span class="n">data</span><span class="o">.</span><span class="n">table</span><span class="p">::</span><span class="n">fread</span><span class="p">(</span><span class="s2">&quot;./list_station_NC.csv&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> 
-  <span class="n">tidyr</span><span class="p">::</span><span class="n">drop_na</span><span class="p">(</span><span class="n">LON</span><span class="p">,</span> <span class="n">LAT</span><span class="p">)</span>
+# list of weather station in NC
+NC_station <- data.table::fread("./list_station_NC.csv") %>% 
+  tidyr::drop_na(LON, LAT)
 
-<span class="c1"># list of weather station in GA, SC, TN and VA</span>
-<span class="n">NC_surrounding_station</span> <span class="o">&lt;-</span> <span class="n">data</span><span class="o">.</span><span class="n">table</span><span class="p">::</span><span class="n">fread</span><span class="p">(</span><span class="s2">&quot;./list_station_NC_surrounding.csv&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span> 
-  <span class="n">tidyr</span><span class="p">::</span><span class="n">drop_na</span><span class="p">(</span><span class="n">LON</span><span class="p">,</span> <span class="n">LAT</span><span class="p">)</span>
-</pre></div>
+# list of weather station in GA, SC, TN and VA
+NC_surrounding_station <- data.table::fread("./list_station_NC_surrounding.csv") %>% 
+  tidyr::drop_na(LON, LAT)
+
+</textarea>
+  </div>
+</div>
+
+</div>
 
 </div>
 </div>
-</div>
 
-</div>
+
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -14457,20 +14774,23 @@ AABJRU5ErkJggg=="
 </div>
 </div>
 </div>
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="n">map_NC2010_trt_point</span> <span class="o">&lt;-</span> <span class="n">map_NC2010_trt</span> <span class="o">+</span>
-  <span class="n">geom_point</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">NC_station</span><span class="p">,</span> <span class="n">aes</span><span class="p">(</span><span class="n">LON</span><span class="p">,</span> <span class="n">LAT</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span> <span class="o">+</span>
-  <span class="n">geom_point</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">NC_surrounding_station</span><span class="p">,</span> <span class="n">aes</span><span class="p">(</span><span class="n">LON</span><span class="p">,</span> <span class="n">LAT</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
+<div class="prompt input_prompt">In&nbsp;[7]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 7.17145em">
+   <textarea rows="5"
+      class="sos-source" name="R">map_NC2010_trt_point <- map_NC2010_trt +
+  geom_point(data=NC_station, aes(LON, LAT), color="red") +
+  geom_point(data=NC_surrounding_station, aes(LON, LAT), color="green")
 
-<span class="n">map_NC2010_trt_point</span>
-</pre></div>
+map_NC2010_trt_point
+</textarea>
+  </div>
+</div>
 
-</div>
-</div>
 </div>
 
 <div class="output_wrapper">
@@ -16780,6 +17100,9 @@ gICVwP8HpVFLL67APFYAAAAASUVORK5CYII="
 </div>
 
 </div>
+</div>
+
+
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -16788,22 +17111,27 @@ gICVwP8HpVFLL67APFYAAAAASUVORK5CYII="
 </div>
 </div>
 </div>
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="n">xy_NC_cen_cty</span> <span class="o">&lt;-</span> <span class="n">NC_cen_cty</span><span class="p">[,</span> <span class="n">c</span><span class="p">(</span><span class="s2">&quot;LONGITUDE&quot;</span><span class="p">,</span> <span class="s2">&quot;LATITUDE&quot;</span><span class="p">)]</span>
-<span class="n">xy_NC_station</span> <span class="o">&lt;-</span> <span class="n">NC_station</span><span class="p">[,</span> <span class="n">c</span><span class="p">(</span><span class="s2">&quot;LON&quot;</span><span class="p">,</span> <span class="s2">&quot;LAT&quot;</span><span class="p">)]</span>
-<span class="n">xy_NC_surrounding_station</span> <span class="o">&lt;-</span> <span class="n">NC_surrounding_station</span><span class="p">[,</span> 
-                                                    <span class="n">c</span><span class="p">(</span><span class="s2">&quot;LON&quot;</span><span class="p">,</span> <span class="s2">&quot;LAT&quot;</span><span class="p">)]</span>
-</pre></div>
-
-</div>
-</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 5.95716em">
+   <textarea rows="4"
+      class="sos-source" name="R">xy_NC_cen_cty <- NC_cen_cty[, c("LONGITUDE", "LATITUDE")]
+xy_NC_station <- NC_station[, c("LON", "LAT")]
+xy_NC_surrounding_station <- NC_surrounding_station[, 
+                                                    c("LON", "LAT")]</textarea>
+  </div>
 </div>
 
 </div>
+
+</div>
+</div>
+
+
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -16821,25 +17149,31 @@ gICVwP8HpVFLL67APFYAAAAASUVORK5CYII="
 </div>
 </div>
 </div>
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="c1"># using the same CRS with the 2010 NC Tracts</span>
-<span class="n">spdf_NC_cen_cty</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">SpatialPointsDataFrame</span><span class="p">(</span><span class="n">coords</span> <span class="o">=</span> <span class="n">xy_NC_cen_cty</span><span class="p">,</span> 
-                                          <span class="n">data</span> <span class="o">=</span> <span class="n">NC_cen_cty</span><span class="p">,</span> <span class="n">proj4string</span> <span class="o">=</span> <span class="n">NC2010Trt</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-<span class="c1"># project the spatial object</span>
-<span class="n">new_CRS</span> <span class="o">&lt;-</span> <span class="s2">&quot;+proj=lcc +lat_1=34.33333333333334 +lat_2=36.16666666666666 +lat_0=33.75 +lon_0=-79 +x_0=609601.22 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0&quot;</span>
-<span class="n">spdf_NC_cen_cty_pj</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">spTransform</span><span class="p">(</span><span class="n">spdf_NC_cen_cty</span><span class="p">,</span> 
-                                      <span class="n">sp</span><span class="p">::</span><span class="n">CRS</span><span class="p">(</span><span class="n">new_CRS</span><span class="p">))</span>
-</pre></div>
-
-</div>
-</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 9.60003em">
+   <textarea rows="7"
+      class="sos-source" name="R"># using the same CRS with the 2010 NC Tracts
+spdf_NC_cen_cty <- sp::SpatialPointsDataFrame(coords = xy_NC_cen_cty, 
+                                          data = NC_cen_cty, proj4string = NC2010Trt.crs)
+# project the spatial object
+new_CRS <- "+proj=lcc +lat_1=34.33333333333334 +lat_2=36.16666666666666 +lat_0=33.75 +lon_0=-79 +x_0=609601.22 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0"
+spdf_NC_cen_cty_pj <- sp::spTransform(spdf_NC_cen_cty, 
+                                      sp::CRS(new_CRS))
+</textarea>
+  </div>
 </div>
 
 </div>
+
+</div>
+</div>
+
+
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -16855,32 +17189,38 @@ gICVwP8HpVFLL67APFYAAAAASUVORK5CYII="
 </div>
 </div>
 </div>
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="c1"># using the same CRS with the 2010 NC Tracts</span>
-<span class="n">spdf_NC_station</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">SpatialPointsDataFrame</span><span class="p">(</span><span class="n">coords</span> <span class="o">=</span> <span class="n">xy_NC_station</span><span class="p">,</span> 
-                                          <span class="n">data</span> <span class="o">=</span> <span class="n">NC_station</span><span class="p">,</span> <span class="n">proj4string</span> <span class="o">=</span> <span class="n">NC2010Trt</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-<span class="c1"># project the spatial object</span>
-<span class="n">spdf_NC_station_pj</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">spTransform</span><span class="p">(</span><span class="n">spdf_NC_station</span><span class="p">,</span> 
-                                      <span class="n">sp</span><span class="p">::</span><span class="n">CRS</span><span class="p">(</span><span class="n">new_CRS</span><span class="p">))</span>
+<div class="prompt input_prompt">In&nbsp;[10]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 18.100060000000003em">
+   <textarea rows="14"
+      class="sos-source" name="R"># using the same CRS with the 2010 NC Tracts
+spdf_NC_station <- sp::SpatialPointsDataFrame(coords = xy_NC_station, 
+                                          data = NC_station, proj4string = NC2010Trt.crs)
+# project the spatial object
+spdf_NC_station_pj <- sp::spTransform(spdf_NC_station, 
+                                      sp::CRS(new_CRS))
 
-<span class="c1"># using the same CRS with the 2010 NC Tracts</span>
-<span class="n">spdf_NC_surrounding_station</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">SpatialPointsDataFrame</span><span class="p">(</span><span class="n">coords</span> <span class="o">=</span> <span class="n">xy_NC_surrounding_station</span><span class="p">,</span> 
-                                                      <span class="n">data</span> <span class="o">=</span> <span class="n">NC_surrounding_station</span><span class="p">,</span> 
-                                                          <span class="n">proj4string</span> <span class="o">=</span> <span class="n">NC2010Trt</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-<span class="c1"># project the spatial object</span>
-<span class="n">spdf_NC_surrounding_station_pj</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">spTransform</span><span class="p">(</span><span class="n">spdf_NC_surrounding_station</span><span class="p">,</span> 
-                                                  <span class="n">sp</span><span class="p">::</span><span class="n">CRS</span><span class="p">(</span><span class="n">new_CRS</span><span class="p">))</span>
-</pre></div>
-
-</div>
-</div>
+# using the same CRS with the 2010 NC Tracts
+spdf_NC_surrounding_station <- sp::SpatialPointsDataFrame(coords = xy_NC_surrounding_station, 
+                                                      data = NC_surrounding_station, 
+                                                          proj4string = NC2010Trt.crs)
+# project the spatial object
+spdf_NC_surrounding_station_pj <- sp::spTransform(spdf_NC_surrounding_station, 
+                                                  sp::CRS(new_CRS))
+</textarea>
+  </div>
 </div>
 
 </div>
+
+</div>
+</div>
+
+
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -16898,99 +17238,119 @@ gICVwP8HpVFLL67APFYAAAAASUVORK5CYII="
 </div>
 </div>
 </div>
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="c1"># select the columns we need</span>
-<span class="n">NC_station_clean</span> <span class="o">&lt;-</span> <span class="n">NC_station</span> <span class="o">%&gt;%</span> <span class="n">dplyr</span><span class="p">::</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;CTRY&quot;</span><span class="p">,</span> 
-                                                 <span class="s2">&quot;LAT&quot;</span><span class="p">,</span> 
-                                                 <span class="s2">&quot;LON&quot;</span><span class="p">,</span> 
-                                                 <span class="s2">&quot;STATE&quot;</span><span class="p">,</span> 
-                                                 <span class="s2">&quot;STATION NAME&quot;</span><span class="p">,</span> 
-                                                 <span class="s2">&quot;USAF&quot;</span><span class="p">,</span> <span class="c1"># Air Force Station ID</span>
-                                                 <span class="s2">&quot;WBAN&quot;</span><span class="p">,</span> <span class="c1"># Weather-Bureau-Army-Navy</span>
-                                                 <span class="s2">&quot;combine_USAF_WBAN&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
-  <span class="n">dplyr</span><span class="p">::</span><span class="n">mutate</span><span class="p">(</span><span class="n">combine_USAF_WBAN</span> <span class="o">=</span> <span class="k">as</span><span class="o">.</span><span class="n">character</span><span class="p">(</span><span class="n">combine_USAF_WBAN</span><span class="p">))</span> <span class="c1"># make sure it&#39;s not int</span>
+<div class="prompt input_prompt">In&nbsp;[11]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 36.31441em">
+   <textarea rows="29"
+      class="sos-source" name="R"># select the columns we need
+NC_station_clean <- NC_station %>% dplyr::select("CTRY", 
+                                                 "LAT", 
+                                                 "LON", 
+                                                 "STATE", 
+                                                 "STATION NAME", 
+                                                 "USAF", # Air Force Station ID
+                                                 "WBAN", # Weather-Bureau-Army-Navy
+                                                 "combine_USAF_WBAN") %>%
+  dplyr::mutate(combine_USAF_WBAN = as.character(combine_USAF_WBAN)) # make sure it's not int
 
-<span class="n">NC_surrounding_station_clean</span> <span class="o">&lt;-</span> <span class="n">NC_surrounding_station</span> <span class="o">%&gt;%</span> 
-  <span class="n">dplyr</span><span class="p">::</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;CTRY&quot;</span><span class="p">,</span> <span class="s2">&quot;LAT&quot;</span><span class="p">,</span> <span class="s2">&quot;LON&quot;</span><span class="p">,</span> <span class="s2">&quot;STATE&quot;</span><span class="p">,</span> <span class="s2">&quot;STATION NAME&quot;</span><span class="p">,</span> 
-                <span class="s2">&quot;USAF&quot;</span><span class="p">,</span> <span class="s2">&quot;WBAN&quot;</span><span class="p">,</span> <span class="s2">&quot;combine_USAF_WBAN&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
-  <span class="n">dplyr</span><span class="p">::</span><span class="n">mutate</span><span class="p">(</span><span class="n">combine_USAF_WBAN</span> <span class="o">=</span> <span class="k">as</span><span class="o">.</span><span class="n">character</span><span class="p">(</span><span class="n">combine_USAF_WBAN</span><span class="p">))</span> <span class="c1"># make sure it&#39;s not int</span>
+NC_surrounding_station_clean <- NC_surrounding_station %>% 
+  dplyr::select("CTRY", "LAT", "LON", "STATE", "STATION NAME", 
+                "USAF", "WBAN", "combine_USAF_WBAN") %>%
+  dplyr::mutate(combine_USAF_WBAN = as.character(combine_USAF_WBAN)) # make sure it's not int
 
-<span class="c1"># union the stations in NC and the stations in GA, SC, TN and VA</span>
-<span class="n">merge_station_clean</span> <span class="o">&lt;-</span> <span class="n">rbind</span><span class="p">(</span><span class="n">NC_station_clean</span><span class="p">,</span> <span class="n">NC_surrounding_station_clean</span><span class="p">)</span>
+# union the stations in NC and the stations in GA, SC, TN and VA
+merge_station_clean <- rbind(NC_station_clean, NC_surrounding_station_clean)
 
-<span class="c1"># get lon, lat</span>
-<span class="n">xy_merge_station_clean</span> <span class="o">&lt;-</span> <span class="n">merge_station_clean</span><span class="p">[,</span> <span class="n">c</span><span class="p">(</span><span class="s2">&quot;LON&quot;</span><span class="p">,</span> 
-                                                  <span class="s2">&quot;LAT&quot;</span><span class="p">)]</span>
-<span class="c1"># define spatial object, using the same CRS with the 2010 NC Tracts</span>
-<span class="n">spdf_merge_station_clean</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">SpatialPointsDataFrame</span><span class="p">(</span><span class="n">coords</span> <span class="o">=</span> <span class="n">xy_merge_station_clean</span><span class="p">,</span> 
-                                                   <span class="n">data</span> <span class="o">=</span> <span class="n">merge_station_clean</span><span class="p">,</span> 
-                                                       <span class="n">proj4string</span> <span class="o">=</span> <span class="n">NC2010Trt</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-<span class="c1"># project the spatial object</span>
-<span class="n">spdf_merge_station_clean_pj</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">spTransform</span><span class="p">(</span><span class="n">spdf_merge_station_clean</span><span class="p">,</span> 
-                                           <span class="n">sp</span><span class="p">::</span><span class="n">CRS</span><span class="p">(</span><span class="n">new_CRS</span><span class="p">))</span>
-</pre></div>
-
-</div>
-</div>
+# get lon, lat
+xy_merge_station_clean <- merge_station_clean[, c("LON", 
+                                                  "LAT")]
+# define spatial object, using the same CRS with the 2010 NC Tracts
+spdf_merge_station_clean <- sp::SpatialPointsDataFrame(coords = xy_merge_station_clean, 
+                                                   data = merge_station_clean, 
+                                                       proj4string = NC2010Trt.crs)
+# project the spatial object
+spdf_merge_station_clean_pj <- sp::spTransform(spdf_merge_station_clean, 
+                                           sp::CRS(new_CRS))
+</textarea>
+  </div>
 </div>
 
 </div>
+
+</div>
+</div>
+
+
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="c1"># calculate distance between points</span>
-<span class="n">distance_station_cen</span> <span class="o">&lt;-</span> <span class="n">rgeos</span><span class="p">::</span><span class="n">gDistance</span><span class="p">(</span><span class="n">spdf_merge_station_clean_pj</span><span class="p">,</span> 
-                                  <span class="n">spdf_NC_cen_cty_pj</span><span class="p">,</span> <span class="n">byid</span> <span class="o">=</span> <span class="n">T</span><span class="p">)</span>
+<div class="prompt input_prompt">In&nbsp;[12]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 19.314350000000005em">
+   <textarea rows="15"
+      class="sos-source" name="R"># calculate distance between points
+distance_station_cen <- rgeos::gDistance(spdf_merge_station_clean_pj, 
+                                  spdf_NC_cen_cty_pj, byid = T)
 
-<span class="c1"># get the index of station from the distance matrix</span>
-<span class="n">index_crt_station</span> <span class="o">&lt;-</span> <span class="nb">apply</span><span class="p">(</span><span class="n">distance_station_cen</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> 
-                           <span class="n">which</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
+# get the index of station from the distance matrix
+index_crt_station <- apply(distance_station_cen, 1, 
+                           which.min)
 
-<span class="c1"># merge the result of cloest station index back to the target dataframe</span>
-<span class="n">merge_weather_station_crt</span> <span class="o">&lt;-</span> <span class="n">cbind</span><span class="p">(</span><span class="n">NC_cen_cty</span><span class="p">,</span> <span class="n">index_crt_station</span><span class="p">)</span> <span class="o">%&gt;%</span>
-  <span class="n">mutate</span><span class="p">(</span><span class="n">index_crt_station</span><span class="o">=</span><span class="k">as</span><span class="o">.</span><span class="n">character</span><span class="p">(</span><span class="n">index_crt_station</span><span class="p">))</span>
+# merge the result of cloest station index back to the target dataframe
+merge_weather_station_crt <- cbind(NC_cen_cty, index_crt_station) %>%
+  mutate(index_crt_station=as.character(index_crt_station))
 
-<span class="c1"># for joining purpose</span>
-<span class="n">merge_station_clean</span><span class="err">$</span><span class="n">row_number</span> <span class="o">&lt;-</span> <span class="n">row</span><span class="o">.</span><span class="n">names</span><span class="p">(</span><span class="n">merge_station_clean</span><span class="p">)</span>
-</pre></div>
+# for joining purpose
+merge_station_clean$row_number <- row.names(merge_station_clean)
+
+</textarea>
+  </div>
+</div>
+
+</div>
 
 </div>
 </div>
-</div>
 
-</div>
+
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="n">census_trt_join_station</span> <span class="o">&lt;-</span> <span class="n">left_join</span><span class="p">(</span><span class="n">merge_weather_station_crt</span><span class="p">,</span> 
-                                     <span class="n">merge_station_clean</span><span class="p">,</span> 
-                                     <span class="n">by</span> <span class="o">=</span> <span class="n">c</span><span class="p">(</span><span class="s2">&quot;index_crt_station&quot;</span><span class="o">=</span> <span class="s2">&quot;row_number&quot;</span><span class="p">)</span>
-                                    <span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
+<div class="prompt input_prompt">In&nbsp;[13]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 5.95716em">
+   <textarea rows="4"
+      class="sos-source" name="R">census_trt_join_station <- left_join(merge_weather_station_crt, 
+                                     merge_station_clean, 
+                                     by = c("index_crt_station"= "row_number")
+                                    )</textarea>
+  </div>
 </div>
 
 </div>
+
+</div>
+</div>
+
+
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="n">head</span><span class="p">(</span><span class="n">census_trt_join_station</span><span class="p">)</span>
-</pre></div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 2.31429em">
+   <textarea rows="1"
+      class="sos-source" name="R">head(census_trt_join_station)</textarea>
+  </div>
+</div>
 
-</div>
-</div>
 </div>
 
 <div class="output_wrapper">
@@ -17024,6 +17384,9 @@ gICVwP8HpVFLL67APFYAAAAASUVORK5CYII="
 </div>
 
 </div>
+</div>
+
+
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -17034,29 +17397,36 @@ gICVwP8HpVFLL67APFYAAAAASUVORK5CYII="
 </div>
 </div>
 </div>
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="n">census_trt_join_station</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">over</span><span class="p">(</span><span class="n">spdf_NC_station</span><span class="p">,</span> <span class="n">NC2010Trt</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 2.31429em">
+   <textarea rows="1"
+      class="sos-source" name="R">census_trt_join_station <- sp::over(spdf_NC_station, NC2010Trt)</textarea>
+  </div>
 </div>
 
 </div>
+
+</div>
+</div>
+
+
+
+<div class="lan_R">
+   
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="n">head</span><span class="p">(</span><span class="n">census_trt_join_station</span><span class="p">)</span>
-</pre></div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div><div class="inner_cell" >
+  <div class="input_area cm-s-ipython" style="min-height: 2.31429em">
+   <textarea rows="1"
+      class="sos-source" name="R">head(census_trt_join_station)</textarea>
+  </div>
+</div>
 
-</div>
-</div>
 </div>
 
 <div class="output_wrapper">
@@ -17090,6 +17460,9 @@ gICVwP8HpVFLL67APFYAAAAASUVORK5CYII="
 </div>
 
 </div>
+</div>
+
+
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -17106,6 +17479,597 @@ gICVwP8HpVFLL67APFYAAAAASUVORK5CYII="
     </div>
   </div>
 </body>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/codemirror.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/mode/python/python.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/mode/r/r.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/mode/octave/octave.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/mode/ruby/ruby.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/mode/sas/sas.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/mode/javascript/javascript.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/mode/shell/shell.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/mode/julia/julia.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0/mode/markdown/markdown.js"></script>
+<script>
+    /**
+ * Copyright (c) Bo Peng and UT MD Anderson Cancer Center
+ * Distributed under the terms of the Modified BSD License.
+ **/
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("codemirror/lib/codemirror"),
+      require("codemirror/mode/python/python"),
+      require("codemirror/mode/r/r"),
+      require("codemirror/mode/octave/octave"),
+      require("codemirror/mode/ruby/ruby"),
+      require("codemirror/mode/sas/sas"),
+      require("codemirror/mode/javascript/javascript"),
+      require("codemirror/mode/shell/shell"),
+      require("codemirror/mode/julia/julia"),
+      require("codemirror/mode/markdown/markdown"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["codemirror/lib/codemirror", "codemirror/mode/python/python",
+      "codemirror/mode/markdown/markdown", "codemirror/mode/r/r"
+    ], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  var sosKeywords = ["input", "output", "depends", "parameter"];
+  var sosActionWords = ["script", "download", "run", "bash", "sh", "csh",
+    "tcsh", "zsh", "python", "python2", "python3", "R", "node", "julia",
+    "matlab", "octave", "ruby", "perl", "report", "pandoc", "docker_build",
+    "Rmarkdown"
+  ];
+  var sosMagicWords = ['cd', 'capture', 'clear', 'debug', 'dict', 'expand', 'get',
+    'matplotlib', 'paste', 'preview', 'pull', 'push', 'put', 'render',
+    'rerun', 'run', 'save', 'sandbox', 'set', 'sessioninfo', 'sosrun',
+    'sossave', 'shutdown', 'taskinfo', 'tasks', 'toc', 'use', 'with'
+  ]
+  var sosFunctionWords = ["sos_run", "logger", "get_output"];
+
+  var hintWords = sosKeywords.concat(sosActionWords).concat(sosFunctionWords)
+    .concat(sosMagicWords);
+
+  var sosDirectives = sosKeywords.map(x => x + ":");
+  var sosActions = sosActionWords.map(x => x + ":");
+  var sosMagics = sosMagicWords.map(x => '%' + x);
+
+  // hint word for SoS mode
+  CodeMirror.registerHelper("hintWords", "sos", hintWords);
+
+  var modeMap = {
+    'sos': null,
+    'python': {
+      name: 'python',
+      version: 3
+    },
+    'python2': {
+      name: 'python',
+      version: 2
+    },
+    'python3': {
+      name: 'python',
+      version: 3
+    },
+    'r': 'r',
+    'report': 'markdown',
+    'pandoc': 'markdown',
+    'download': 'markdown',
+    'markdown': 'markdown',
+    'ruby': 'ruby',
+    'sas': 'sas',
+    'bash': 'shell',
+    'sh': 'shell',
+    'julia': 'julia',
+    'run': 'shell',
+    'javascript': 'javascript',
+    'typescript': {
+      name: "javascript",
+      typescript: true
+    },
+    'octave': 'octave',
+    'matlab': 'octave',
+  }
+
+  function findMode(mode) {
+    if (mode in modeMap) {
+      return modeMap[mode];
+    }
+    return null;
+  }
+
+  function markExpr(python_mode) {
+    return {
+      startState: function() {
+        return {
+          in_python: false,
+          sigil: null,
+          matched: true,
+          python_state: CodeMirror.startState(python_mode),
+        };
+      },
+
+      copyState: function(state) {
+        return {
+          in_python: state.in_python,
+          sigil: state.sigil,
+          matched: state.matched,
+          python_state: CodeMirror.copyState(python_mode, state.python_state)
+        };
+      },
+
+      token: function(stream, state) {
+        if (state.in_python) {
+          if (stream.match(state.sigil.right)) {
+            state.in_python = false;
+            state.python_state = CodeMirror.startState(python_mode);
+            return "sos-sigil";
+          }
+          let it = null;
+          try {
+            it = python_mode.token(stream, state.python_state);
+          } catch (error) {
+            return "sos-interpolated error" + (state.matched ? "" : " sos-unmatched");
+          }
+          if (it == 'variable' || it == 'builtin') {
+            let ct = stream.current();
+            // warn users in the use of input and output in {}
+            if (ct === 'input' || ct === 'output')
+              it += ' error';
+          }
+          return (it ? ("sos-interpolated " + it) : "sos-interpolated") + (state.matched ? "" : " sos-unmatched");
+        } else {
+          // remove the double brace case, the syntax highlighter
+          // does not have to worry (highlight) }}, although it would
+          // probably mark an error for single }
+          if (state.sigil.left === '{' && stream.match(/\{\{/))
+            return null;
+          if (stream.match(state.sigil.left)) {
+            state.in_python = true;
+            // let us see if there is any right sigil till the end of the editor.
+            try {
+              let rest = stream.string.slice(stream.pos);
+              if (!rest.includes(state.sigil.right)) {
+                state.matched = false;
+                for (let idx = 1; idx < 5; ++idx) {
+                  if (stream.lookAhead(idx).includes(state.sigil.right)) {
+                    state.matched = true;
+                    break;
+                  }
+                }
+              }
+            } catch (error) {
+              // only codemirror 5.27.0 supports this function
+            }
+            return "sos-sigil" + (state.matched ? "" : " sos-unmatched");
+          }
+          while (stream.next() && !stream.match(state.sigil.left, false)) {}
+          return null;
+        }
+      }
+    }
+  }
+
+  CodeMirror.defineMode("sos", function(conf, parserConf) {
+    let sosPythonConf = {};
+    for (let prop in parserConf) {
+      if (parserConf.hasOwnProperty(prop)) {
+        sosPythonConf[prop] = parserConf[prop];
+      }
+    }
+    sosPythonConf.name = 'python';
+    sosPythonConf.version = 3;
+    sosPythonConf.extra_keywords = sosActionWords.concat(sosFunctionWords);
+    // this is the SoS flavored python mode with more identifiers
+    var base_mode = null;
+    if ('base_mode' in parserConf && parserConf.base_mode && parserConf.base_mode !== 'sos' && parserConf.base_mode !== 'SoS') {
+      let mode = findMode(parserConf.base_mode.toLowerCase());
+      if (mode) {
+        base_mode = CodeMirror.getMode(conf, mode);
+      } else {
+        console.log(`No base mode is found for ${parserConf.base_mode}. Python mode used.`);
+      }
+    } else if ('base_mode' in conf && conf.base_mode && conf.base_mode !== 'sos' && conf.base_mode !== 'SoS') {
+      let mode = findMode(conf.base_mode.toLowerCase());
+      if (mode) {
+        base_mode = CodeMirror.getMode(conf, mode);
+      } else {
+        console.log(`No base mode is found for ${conf.base_mode}. Python mode used.`);
+      }
+    }
+    // if there is a user specified base mode, this is the single cell mode
+    if (base_mode) {
+      var python_mode = CodeMirror.getMode({}, {
+        name: 'python',
+        version: 3
+      });
+      var overlay_mode = markExpr(python_mode);
+      return {
+        startState: function() {
+          return {
+            sos_mode: true,
+            base_state: CodeMirror.startState(base_mode),
+            overlay_state: CodeMirror.startState(overlay_mode),
+            // for overlay
+            basePos: 0,
+            baseCur: null,
+            overlayPos: 0,
+            overlayCur: null,
+            streamSeen: null
+          };
+        },
+
+        copyState: function(state) {
+          return {
+            sos_mode: state.sos_mode,
+            base_state: CodeMirror.copyState(base_mode, state.base_state),
+            overlay_state: CodeMirror.copyState(overlay_mode, state.overlay_state),
+            // for overlay
+            basePos: state.basePos,
+            baseCur: null,
+            overlayPos: state.overlayPos,
+            overlayCur: null
+          };
+        },
+
+        token: function(stream, state) {
+          if (state.sos_mode) {
+            if (stream.sol()) {
+              let sl = stream.peek();
+              if (sl == '!') {
+                stream.skipToEnd();
+                return "meta";
+              } else if (sl == '#') {
+                stream.skipToEnd();
+                return 'comment'
+              }
+              for (var i = 0; i < sosMagics.length; i++) {
+                if (stream.match(sosMagics[i])) {
+                  if (sosMagics[i] === "%expand") {
+                    if (stream.eol() || stream.match(/\s*$/, false)) {
+                      state.overlay_state.sigil = {
+                        'left': '{',
+                        'right': '}'
+                      }
+                    } else {
+                      let found = stream.match(/\s+(\S+)\s+(\S+)$/, false);
+                      if (found) {
+                        state.overlay_state.sigil = {
+                          'left': found[1],
+                          'right': found[2]
+                        }
+                      } else {
+                        state.overlay_state.sigil = null;
+                      }
+                    }
+                  }
+                  // the rest of the lines will be processed as Python code
+                  return "meta";
+                }
+              }
+              state.sos_mode = false;
+            } else {
+              stream.skipToEnd();
+              return null;
+            }
+          }
+
+          if (state.overlay_state.sigil) {
+            if (stream != state.streamSeen ||
+              Math.min(state.basePos, state.overlayPos) < stream.start) {
+              state.streamSeen = stream;
+              state.basePos = state.overlayPos = stream.start;
+            }
+
+            if (stream.start == state.basePos) {
+              state.baseCur = base_mode.token(stream, state.base_state);
+              state.basePos = stream.pos;
+            }
+            if (stream.start == state.overlayPos) {
+              stream.pos = stream.start;
+              state.overlayCur = overlay_mode.token(stream, state.overlay_state);
+              state.overlayPos = stream.pos;
+            }
+            stream.pos = Math.min(state.basePos, state.overlayPos);
+
+            // state.overlay.combineTokens always takes precedence over combine,
+            // unless set to null
+            return state.overlayCur ? state.overlayCur : state.baseCur;
+          } else {
+            return base_mode.token(stream, state.base_state);
+          }
+        },
+
+        indent: function(state, textAfter) {
+          // inner indent
+          if (!state.sos_mode) {
+            if (!base_mode.indent) return CodeMirror.Pass;
+            return base_mode.indent(state.base_state, textAfter);
+          } else {
+            // sos mode has no indent
+            return 0;
+          }
+        },
+
+        innerMode: function(state) {
+          return state.sos_mode ? {
+            state: state.base_state,
+            mode: base_mode
+          } : null;
+        },
+
+        lineComment: "#",
+        fold: "indent"
+      };
+    } else {
+      // this is SoS mode
+      base_mode = CodeMirror.getMode(conf, sosPythonConf);
+      overlay_mode = markExpr(base_mode);
+      return {
+        startState: function() {
+          return {
+            sos_state: null,
+            base_state: CodeMirror.startState(base_mode),
+            overlay_state: CodeMirror.startState(overlay_mode),
+            inner_mode: null,
+            inner_state: null,
+            // for overlay
+            basePos: 0,
+            baseCur: null,
+            overlayPos: 0,
+            overlayCur: null,
+            streamSeen: null
+          };
+        },
+
+        copyState: function(state) {
+          return {
+            sos_state: state.sos_state,
+            base_state: CodeMirror.copyState(base_mode, state.base_state),
+            overlay_state: CodeMirror.copyState(overlay_mode, state.overlay_state),
+            inner_mode: state.inner_mode,
+            inner_state: state.inner_mode && CodeMirror.copyState(state.inner_mode, state.inner_state),
+            // for overlay
+            basePos: state.basePos,
+            baseCur: null,
+            overlayPos: state.overlayPos,
+            overlayCur: null
+          };
+        },
+
+        token: function(stream, state) {
+          if (stream.sol()) {
+            let sl = stream.peek();
+            if (sl == '[') {
+              // header, move to the end
+              if (stream.match(/^\[.*\]$/, false)) {
+                // if there is no :, the easy case
+                if (stream.match(/^\[[^:]*\]$/)) {
+                  // reset state
+                  state.sos_state = null;
+                  state.inner_mode = null;
+                  return "header line-section-header";
+                } else {
+                  // match up to :
+                  stream.match(/^\[[^:]*:/);
+                  state.sos_state = 'header_option';
+                  return "header line-section-header";
+                }
+              }
+            } else if (sl == '!') {
+              stream.eatWhile(/\S/);
+              return "meta";
+            } else if (sl == '#') {
+              stream.skipToEnd();
+              return "comment";
+            } else if (sl == '%') {
+              stream.eatWhile(/\S/);
+              return "meta";
+            } else if (state.sos_state && state.sos_state.startsWith('entering')) {
+              // the second parameter is starting column
+              let mode = findMode(state.sos_state.slice(9).toLowerCase());
+              state.inner_mode = CodeMirror.getMode(conf, mode);
+              state.inner_state = CodeMirror.startState(state.inner_mode, stream.indentation());
+              state.sos_state = null;
+            }
+            for (var i = 0; i < sosDirectives.length; i++) {
+              if (stream.match(sosDirectives[i])) {
+                // the rest of the lines will be processed as Python code
+                state.sos_state = 'directive_option'
+                return "keyword strong";
+              }
+            }
+            for (var i = 0; i < sosActions.length; i++) {
+              if (stream.match(sosActions[i])) {
+                // switch to submode?
+                if (stream.eol()) {
+                  // really
+                  let mode = findMode(stream.current().slice(0, -1).toLowerCase());
+                  if (mode) {
+                    state.sos_state = "entering " + stream.current().slice(0, -1);
+                  } else {
+                    state.sos_state = 'unknown_language';
+                  }
+                } else {
+                  state.sos_state = 'start ' + stream.current().slice(0, -1);
+                }
+                state.overlay_state.sigil = null;
+                return "builtin strong";
+              }
+            }
+            // if unknown action
+            if (stream.match(/\w+:/)) {
+              state.overlay_state.sigil = null;
+              state.sos_state = 'start ' + stream.current().slice(0, -1);
+              return "builtin strong";
+            }
+          } else if (state.sos_state == 'header_option') {
+            // stuff after :
+            if (stream.peek() == ']') {
+              // move next
+              stream.next();
+              // ] is the last char
+              if (stream.eol()) {
+                state.sos_state = null;
+                state.inner_mode = null;
+                return "header line-section-header";
+              } else {
+                stream.backUp(1);
+                let it = base_mode.token(stream, state.base_state);
+                return it ? it + ' sos-option' : null;
+              }
+            } else {
+              let it = base_mode.token(stream, state.base_state);
+              return it ? it + ' sos-option' : null;
+            }
+          } else if (state.sos_state == 'directive_option') {
+            // stuff after input:, R: etc
+            if (stream.peek() == ',') {
+              // move next
+              stream.next();
+              // , is the last char, continue option line
+              if (stream.eol()) {
+                stream.backUp(1);
+                let it = base_mode.token(stream, state.base_state);
+                return it ? it + ' sos-option' : null;
+              }
+              stream.backUp(1);
+            } else if (stream.eol()) {
+              // end of line stops option mode
+              state.sos_state = null;
+              state.inner_mode = null;
+            }
+            let it = base_mode.token(stream, state.base_state);
+            return it ? it + ' sos-option' : null;
+          } else if (state.sos_state && state.sos_state.startsWith("start ")) {
+            // try to understand option expand=
+            if (stream.match(/expand\s*=\s*True/, false)) {
+              // highlight {}
+              state.overlay_state.sigil = {
+                'left': '{',
+                'right': '}'
+              }
+            } else {
+              let found = stream.match(/expand\s*=\s*"(\S+) (\S+)"/, false);
+              if (!found)
+                found = stream.match(/expand\s*=\s*'(\S+) (\S+)'/, false);
+              if (found) {
+                state.overlay_state.sigil = {
+                  'left': found[1],
+                  'right': found[2]
+                }
+              }
+            }
+            let token = base_mode.token(stream, state.base_state);
+            // if it is end of line, ending the starting switch mode
+            if (stream.eol() && stream.peek() !== ',') {
+              // really
+              let mode = findMode(state.sos_state.slice(6).toLowerCase());
+              if (mode) {
+                state.sos_state = "entering " + state.sos_state.slice(6);
+              } else {
+                state.sos_state = 'unknown_language';
+              }
+            }
+            return token + ' sos-option';
+          }
+          // can be start of line but not special
+          if (state.sos_state == 'unknown_language') {
+            // we still handle {} in no man unknown_language
+            if (state.overlay_state.sigil) {
+              return overlay_mode.token(stream, state.overlay_state);
+            } else {
+              stream.skipToEnd();
+              return null;
+            }
+          } else if (state.inner_mode) {
+            let it = 'sos_script ';
+            if (!state.overlay_state.sigil) {
+              let st = state.inner_mode.token(stream, state.inner_state);
+              return st ? it + st : null;
+            } else {
+              // overlay mode, more complicated
+              if (stream != state.streamSeen ||
+                Math.min(state.basePos, state.overlayPos) < stream.start) {
+                state.streamSeen = stream;
+                state.basePos = state.overlayPos = stream.start;
+              }
+
+              if (stream.start == state.basePos) {
+                state.baseCur = state.inner_mode.token(stream, state.inner_state);
+                state.basePos = stream.pos;
+              }
+              if (stream.start == state.overlayPos) {
+                stream.pos = stream.start;
+                state.overlayCur = overlay_mode.token(stream, state.overlay_state);
+                state.overlayPos = stream.pos;
+              }
+              stream.pos = Math.min(state.basePos, state.overlayPos);
+              // state.overlay.combineTokens always takes precedence over combine,
+              // unless set to null
+              return (state.overlayCur ? state.overlayCur : state.baseCur) + " sos-script";
+            }
+          } else {
+            return base_mode.token(stream, state.base_state);
+          }
+        },
+
+        indent: function(state, textAfter) {
+          // inner indent
+          if (state.inner_mode) {
+            if (!state.inner_mode.indent) return CodeMirror.Pass;
+            return state.inner_mode.indent(state.inner_mode, textAfter) + 2;
+          } else {
+            return base_mode.indent(state.base_state, textAfter);
+          }
+        },
+
+        innerMode: function(state) {
+          return state.inner_mode ? null : {
+            state: state.base_state,
+            mode: base_mode
+          };
+        },
+
+        lineComment: "#",
+        fold: "indent",
+        electricInput: /^\s*[\}\]\)]$/,
+      };
+    };
+  }, "python");
+
+  CodeMirror.defineMIME("text/x-sos", "sos");
+});
+</script>
+<script>
+    function highlight_cells(cells, i, interval) {
+        setTimeout(function() {
+            var editor = CodeMirror.fromTextArea(cells[i], {
+                lineNumbers: false,
+                styleActiveLine: true,
+                matchBrackets: true,
+                readOnly: true,
+                mode: 'sos',
+                base_mode: cells[i].name,
+            });
+            $(cells[i]).parent().prepend("<select class='cell-kernel-selector'><option>"
+					       + cells[i].name + "</option></select>");
+            if (i < cells.length)
+                highlight_cells(cells, i + 1, interval);
+        }, interval);
+    }
+
+    highlight_cells(document.getElementsByClassName("sos-source"), 0, 10);
+</script>
+
+
+
+
+
 
  
 
