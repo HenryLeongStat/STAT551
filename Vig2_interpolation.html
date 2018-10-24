@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -12011,6 +12012,74 @@ function sortDataFrame(id, n, dtype) {
 
 </head>
 
+<style type="text/css">
+
+.output_stderr {
+    display: none;
+}
+
+.hidden_content {
+    display: none;
+}
+
+.input_prompt {
+    display: none;
+}
+
+.output_area .prompt {
+    display: none;
+}
+
+.output_prompt {
+    display: none;
+}
+
+.display_control_panel  {
+    padding: 10pt;
+    left: 5px;
+    top: 5px;
+    position: fixed;
+    z-index: 1000;
+}
+
+.display_control_panel:hover {
+    background: rgb(224, 234, 241);
+}
+.display_checkboxes {
+    margin-top: 5pt;
+}
+.display_control_panel:hover .display_control {
+    display: block;
+    opacity: 100;
+}
+.display_control_panel .display_control {
+    opacity: 0;
+}
+
+</style>
+
+
+
+
+<div class='display_control_panel'>
+   <div class="display_control">
+      Display content:<br>
+      <div class="display_checkboxes">
+         <input type="checkbox" id="show_cells" name="show_cells" onclick="toggle_source()">
+         <label for="show_cells">All cells</label>
+         <br>
+         <input type="checkbox" id="show_prompt" name="show_prompt" onclick="toggle_prompt()">
+         <label for="show_prompt">Prompt</label>
+         <br>
+         <input type="checkbox" id="show_messages" name="show_messages" onclick="toggle_messages()">
+         <label for="show_messages">Messages</label>
+      </div>
+   </div>
+</div>
+
+
+
+
 <body>
   <div tabindex="-1" id="notebook" class="border-box-sizing">
     <div class="container" id="notebook-container">
@@ -12027,7 +12096,7 @@ function sortDataFrame(id, n, dtype) {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Goal">Goal<a class="anchor-link" href="#Goal">&#182;</a></h2><p>In Vignette 1, we found out that spatial patterns of Median Household income do exist in Houston. Can we fit statistical models based on these spatial patterns?</p>
+<h2 id="Goal">Goal<a class="anchor-link" href="#Goal">&#182;</a></h2><p>In Vignette 1 (<a href="https://github.com/HenryLeongStat/STAT551/blob/master/Vig1_Spatial_dependence.ipynb">https://github.com/HenryLeongStat/STAT551/blob/master/Vig1_Spatial_dependence.ipynb</a>), we found out that spatial patterns of Median Household income do exist in Houston. We learnt how to do statistical test for spatial dependence, and fit anisotropic variograms.</p>
 <p>In this Vignette, we will see how to further visualize spatial data using ggplot2, and fit statistical models for prediction with polygon data.</p>
 
 </div>
@@ -12037,7 +12106,7 @@ function sortDataFrame(id, n, dtype) {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>First of all, the census dataset we are using here is from <a href="https://www.kinderudp.org/">https://www.kinderudp.org/</a>.</p>
+<p>The census dataset we are using here is from <a href="https://www.kinderudp.org/">https://www.kinderudp.org/</a>.</p>
 
 </div>
 </div>
@@ -12081,27 +12150,38 @@ function sortDataFrame(id, n, dtype) {
 <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris</span><span class="nd">@data</span><span class="err">$</span><span class="nb">id</span> <span class="o">&lt;-</span> <span class="n">rownames</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris</span><span class="nd">@data</span><span class="p">)</span>
 
 <span class="c1"># remove na</span>
-<span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span> <span class="o">&lt;-</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris</span><span class="p">[</span><span class="err">!</span><span class="p">(</span><span class="ow">is</span><span class="o">.</span><span class="n">na</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris</span><span class="nd">@data</span><span class="err">$</span><span class="n">MedHHinc</span><span class="p">)),</span> <span class="p">]</span>
+<span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span> <span class="o">&lt;-</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris</span><span class="p">[</span>
+    <span class="err">!</span><span class="p">(</span><span class="ow">is</span><span class="o">.</span><span class="n">na</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris</span><span class="nd">@data</span><span class="err">$</span><span class="n">MedHHinc</span><span class="p">)),</span> <span class="p">]</span>
 
 <span class="c1"># might have outliers, create another dataset without outlier</span>
 <span class="c1"># outside 1.5 times the interquartile </span>
 <span class="c1"># range above the upper quartile and bellow the lower quartile</span>
-<span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean_rm_ol</span> <span class="o">&lt;-</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">[</span><span class="err">!</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="err">$</span><span class="n">MedHHinc</span> <span class="o">%</span><span class="ow">in</span><span class="o">%</span> <span class="n">boxplot</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="err">$</span><span class="n">MedHHinc</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="n">FALSE</span><span class="p">)</span><span class="err">$</span><span class="n">out</span><span class="p">),</span> <span class="p">]</span>
+<span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean_rm_ol</span> <span class="o">&lt;-</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">[</span>
+    <span class="err">!</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="err">$</span><span class="n">MedHHinc</span> <span class="o">%</span><span class="ow">in</span><span class="o">%</span> 
+      <span class="n">boxplot</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="err">$</span><span class="n">MedHHinc</span><span class="p">,</span> <span class="n">plot</span> <span class="o">=</span> <span class="n">FALSE</span><span class="p">)</span><span class="err">$</span><span class="n">out</span><span class="p">),</span> <span class="p">]</span>
 
 <span class="c1"># convert a spatial object into data.frame</span>
-<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span> <span class="o">&lt;-</span> <span class="n">ggplot2</span><span class="p">::</span><span class="n">fortify</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span> <span class="o">&lt;-</span> <span class="n">ggplot2</span><span class="p">::</span><span class="n">fortify</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> 
+                                   <span class="n">region</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
-<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span> <span class="o">&lt;-</span> <span class="n">merge</span><span class="p">(</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span><span class="p">,</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span> <span class="o">&lt;-</span> <span class="n">merge</span><span class="p">(</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span><span class="p">,</span> 
+                              <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="p">,</span> 
+                              <span class="n">by</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
-<span class="n">map_HarrisCty</span> <span class="o">&lt;-</span> <span class="n">ggplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span><span class="p">,</span> <span class="n">aes</span><span class="p">(</span><span class="nb">long</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span><span class="n">fill</span><span class="o">=</span><span class="n">MedHHinc</span><span class="p">))</span> <span class="o">+</span> 
+<span class="n">map_HarrisCty</span> <span class="o">&lt;-</span> <span class="n">ggplot</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span><span class="p">,</span> 
+                        <span class="n">aes</span><span class="p">(</span><span class="nb">long</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span>
+                            <span class="n">fill</span><span class="o">=</span><span class="n">MedHHinc</span><span class="p">))</span> <span class="o">+</span> 
   <span class="n">geom_polygon</span><span class="p">()</span> <span class="o">+</span>
   <span class="n">geom_path</span><span class="p">(</span><span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span> <span class="o">+</span>
   <span class="n">scale_fill_gradient</span><span class="p">(</span><span class="n">low</span> <span class="o">=</span> <span class="s2">&quot;plum1&quot;</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="s2">&quot;purple4&quot;</span><span class="p">,</span> 
                       <span class="n">breaks</span> <span class="o">=</span> <span class="n">quantile</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="err">$</span><span class="n">MedHHinc</span><span class="p">),</span>
-                     <span class="n">labels</span><span class="o">=</span><span class="n">c</span><span class="p">(</span><span class="s2">&quot;Very Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Medium&quot;</span><span class="p">,</span> <span class="s2">&quot;High&quot;</span><span class="p">,</span> <span class="s2">&quot;Very High&quot;</span><span class="p">))</span> <span class="o">+</span>
+                     <span class="n">labels</span> <span class="o">=</span> 
+                      <span class="n">c</span><span class="p">(</span><span class="s2">&quot;Very Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Medium&quot;</span><span class="p">,</span> <span class="s2">&quot;High&quot;</span><span class="p">,</span> <span class="s2">&quot;Very High&quot;</span><span class="p">))</span> <span class="o">+</span>
   <span class="n">coord_equal</span><span class="p">()</span> <span class="o">+</span>
-  <span class="n">theme</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">(),</span> <span class="n">axis</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">())</span> <span class="o">+</span>
-  <span class="n">labs</span><span class="p">(</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Median Household Income in Harris County&quot;</span><span class="p">,</span> <span class="n">fill</span> <span class="o">=</span> <span class="s2">&quot;Median Household Income&quot;</span><span class="p">)</span>
+  <span class="n">theme</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">(),</span> 
+        <span class="n">axis</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">())</span> <span class="o">+</span>
+  <span class="n">labs</span><span class="p">(</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Median Household Income in Harris County&quot;</span><span class="p">,</span> 
+       <span class="n">fill</span> <span class="o">=</span> <span class="s2">&quot;Median Household Income&quot;</span><span class="p">)</span>
 
 <span class="n">map_HarrisCty</span>
 </pre></div>
@@ -16127,6 +16207,7 @@ z1jSEwQQQAABBBBAAAEEEHAU+P8mGrZLCr6JzgAAAABJRU5ErkJggg=="
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Recall from Vignette 1, there are some outliers. How would these outliers affect interpolation? Should we remove them for interpolation?</p>
+<p>This question will be answered in this vignette.</p>
 
 </div>
 </div>
@@ -16156,11 +16237,12 @@ z1jSEwQQQAABBBBAAAEEEHAU+P8mGrZLCr6JzgAAAABJRU5ErkJggg=="
 <div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-sos"><pre><span></span><span class="n">grid</span> <span class="o">&lt;-</span><span class="n">spsample</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;regular&#39;</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">)</span>
+<div class=" highlight hl-sos"><pre><span></span><span class="n">grid</span> <span class="o">&lt;-</span> <span class="n">spsample</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> 
+                <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;regular&#39;</span><span class="p">,</span> 
+                 <span class="n">n</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">)</span>
 
 <span class="n">Result_num</span><span class="o">.</span><span class="n">idw</span> <span class="o">&lt;-</span> <span class="n">gstat</span><span class="p">::</span><span class="n">idw</span><span class="p">((</span><span class="n">MedHHinc</span><span class="p">)</span><span class="o">~</span><span class="mi">1</span><span class="p">,</span> 
                              <span class="n">location</span><span class="o">=</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> 
-                             <span class="c1">#newdata=harris.grid, </span>
                              <span class="n">newdata</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
                              <span class="n">idp</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> 
 
@@ -16171,7 +16253,7 @@ z1jSEwQQQAABBBBAAAEEEHAU+P8mGrZLCr6JzgAAAABJRU5ErkJggg=="
 <span class="n">idw</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="k">as</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="n">Result_num</span><span class="o">.</span><span class="n">idw</span><span class="p">)</span> 
 <span class="n">idw_plot</span> <span class="o">&lt;-</span> <span class="n">ggplot</span><span class="p">()</span> <span class="o">+</span> 
   <span class="n">geom_tile</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">idw</span><span class="o">.</span><span class="n">output</span> <span class="o">%&gt;%</span>
-            <span class="n">rename</span><span class="p">(</span><span class="sb">`Estimated Median Household Income`</span><span class="o">=</span><span class="n">var1</span><span class="o">.</span><span class="n">pred</span><span class="p">),</span> 
+            <span class="n">rename</span><span class="p">(</span><span class="sb">`Estimated Median Household Income`</span> <span class="o">=</span> <span class="n">var1</span><span class="o">.</span><span class="n">pred</span><span class="p">),</span> 
             <span class="n">aes</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x2</span><span class="p">,</span> <span class="n">fill</span> <span class="o">=</span> <span class="sb">`Estimated Median Household Income`</span><span class="p">))</span> <span class="o">+</span> 
   <span class="c1">#scale_fill_distiller(palette = &quot;Spectral&quot;, direction = 1) +</span>
   <span class="n">scale_fill_gradient</span><span class="p">(</span><span class="n">low</span> <span class="o">=</span> <span class="s2">&quot;plum1&quot;</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="s2">&quot;purple4&quot;</span><span class="p">,</span> 
@@ -16183,12 +16265,17 @@ z1jSEwQQQAABBBBAAAEEEHAU+P8mGrZLCr6JzgAAAABJRU5ErkJggg=="
 <span class="c1"># convert a spatial object into data.frame</span>
 <span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span> <span class="o">&lt;-</span> <span class="n">ggplot2</span><span class="p">::</span><span class="n">fortify</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
-<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span> <span class="o">&lt;-</span> <span class="n">merge</span><span class="p">(</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span><span class="p">,</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span> <span class="o">&lt;-</span> <span class="n">merge</span><span class="p">(</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span><span class="p">,</span> 
+                              <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="p">,</span> 
+                              <span class="n">by</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
 <span class="n">new_plot</span> <span class="o">&lt;-</span> <span class="n">idw_plot</span> <span class="o">+</span>
-  <span class="n">geom_path</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span><span class="p">,</span> <span class="n">aes</span><span class="p">(</span><span class="nb">long</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">),</span> 
-            <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span> <span class="o">+</span>
-  <span class="n">theme</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">(),</span> <span class="n">axis</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">())</span> <span class="o">+</span>
+  <span class="n">geom_path</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span><span class="p">,</span>
+            <span class="n">aes</span><span class="p">(</span><span class="nb">long</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">),</span> 
+            <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span>
+            <span class="n">size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span> <span class="o">+</span>
+  <span class="n">theme</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">(),</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">())</span> <span class="o">+</span>
   <span class="n">labs</span><span class="p">(</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Interpolation for Median Household Income</span><span class="se">\n</span><span class="s2"> in Harris County using inverse weighted distance&quot;</span><span class="p">)</span>
 
 <span class="n">new_plot</span>
@@ -19621,7 +19708,7 @@ ECBwLzDd0YBFUFZSDQAAAABJRU5ErkJggg=="
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>These outliers "pull" all the estimated values up. Using the same break with the actual values, none of the estimated values belong to the groups below "Low". Also, there are no estimated values get close to "very high".</p>
-<p>All in all, smoothing without dealing with outliers is a very bad idea.</p>
+<p>All in all, interpolating without dealing with outliers is a very bad idea.</p>
 <p>What if the outliers get excluded?</p>
 
 </div>
@@ -19638,9 +19725,8 @@ ECBwLzDd0YBFUFZSDQAAAABJRU5ErkJggg=="
 <div class=" highlight hl-sos"><pre><span></span><span class="n">grid</span> <span class="o">&lt;-</span><span class="n">spsample</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;regular&#39;</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">)</span>
 
 <span class="n">Result_num</span><span class="o">.</span><span class="n">idw</span> <span class="o">&lt;-</span> <span class="n">gstat</span><span class="p">::</span><span class="n">idw</span><span class="p">((</span><span class="n">MedHHinc</span><span class="p">)</span><span class="o">~</span><span class="mi">1</span><span class="p">,</span> 
-                             <span class="n">location</span><span class="o">=</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean_rm_ol</span><span class="p">,</span> 
-                             <span class="c1">#newdata=harris.grid, </span>
-                             <span class="n">newdata</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+                             <span class="n">location</span> <span class="o">=</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean_rm_ol</span><span class="p">,</span> 
+                             <span class="n">newdata</span> <span class="o">=</span> <span class="n">grid</span><span class="p">,</span>
                              <span class="n">idp</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> 
 
 <span class="c1"># grab output of IDW for plotting</span>
@@ -19650,23 +19736,29 @@ ECBwLzDd0YBFUFZSDQAAAABJRU5ErkJggg=="
 <span class="n">idw_plot</span> <span class="o">&lt;-</span> <span class="n">ggplot</span><span class="p">()</span> <span class="o">+</span> 
   <span class="n">geom_tile</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">idw</span><span class="o">.</span><span class="n">output</span> <span class="o">%&gt;%</span>
             <span class="n">rename</span><span class="p">(</span><span class="sb">`Estimated Median Household Income`</span><span class="o">=</span><span class="n">var1</span><span class="o">.</span><span class="n">pred</span><span class="p">),</span> 
-            <span class="n">aes</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x2</span><span class="p">,</span> <span class="n">fill</span> <span class="o">=</span> <span class="sb">`Estimated Median Household Income`</span><span class="p">))</span> <span class="o">+</span> 
+            <span class="n">aes</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x2</span><span class="p">,</span> 
+                <span class="n">fill</span> <span class="o">=</span> <span class="sb">`Estimated Median Household Income`</span><span class="p">))</span> <span class="o">+</span> 
   <span class="c1">#scale_fill_distiller(palette = &quot;Spectral&quot;, direction = 1) +</span>
-  <span class="n">scale_fill_gradient</span><span class="p">(</span><span class="n">low</span> <span class="o">=</span> <span class="s2">&quot;plum1&quot;</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="s2">&quot;purple4&quot;</span><span class="p">,</span> 
+  <span class="n">scale_fill_gradient</span><span class="p">(</span><span class="n">low</span> <span class="o">=</span> <span class="s2">&quot;plum1&quot;</span><span class="p">,</span> 
+                      <span class="n">high</span> <span class="o">=</span> <span class="s2">&quot;purple4&quot;</span><span class="p">,</span> 
                       <span class="n">breaks</span> <span class="o">=</span> <span class="n">quantile</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean_rm_ol</span><span class="nd">@data</span><span class="err">$</span><span class="n">MedHHinc</span><span class="p">),</span>
-                      <span class="n">labels</span><span class="o">=</span><span class="n">c</span><span class="p">(</span><span class="s2">&quot;Very Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Medium&quot;</span><span class="p">,</span> <span class="s2">&quot;High&quot;</span><span class="p">,</span> <span class="s2">&quot;Very High&quot;</span><span class="p">))</span> <span class="o">+</span>
+                      <span class="n">labels</span> <span class="o">=</span> <span class="n">c</span><span class="p">(</span><span class="s2">&quot;Very Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Medium&quot;</span><span class="p">,</span> <span class="s2">&quot;High&quot;</span><span class="p">,</span> <span class="s2">&quot;Very High&quot;</span><span class="p">))</span> <span class="o">+</span>
   <span class="n">theme_bw</span><span class="p">()</span>  <span class="o">+</span>
   <span class="n">coord_equal</span><span class="p">()</span> 
 
 <span class="c1"># convert a spatial object into data.frame</span>
-<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span> <span class="o">&lt;-</span> <span class="n">ggplot2</span><span class="p">::</span><span class="n">fortify</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span> <span class="o">&lt;-</span> <span class="n">ggplot2</span><span class="p">::</span><span class="n">fortify</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> 
+                                   <span class="n">region</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
-<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span> <span class="o">&lt;-</span> <span class="n">merge</span><span class="p">(</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span><span class="p">,</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span> <span class="o">&lt;-</span> <span class="n">merge</span><span class="p">(</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span><span class="p">,</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="p">,</span> 
+                              <span class="n">by</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
 <span class="n">new_plot</span> <span class="o">&lt;-</span> <span class="n">idw_plot</span> <span class="o">+</span>
-  <span class="n">geom_path</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span><span class="p">,</span> <span class="n">aes</span><span class="p">(</span><span class="nb">long</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">),</span> 
+  <span class="n">geom_path</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span><span class="p">,</span> 
+            <span class="n">aes</span><span class="p">(</span><span class="nb">long</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">),</span> 
             <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span> <span class="o">+</span>
-  <span class="n">theme</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">(),</span> <span class="n">axis</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">())</span> <span class="o">+</span>
+  <span class="n">theme</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">(),</span> 
+        <span class="n">axis</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">())</span> <span class="o">+</span>
   <span class="n">labs</span><span class="p">(</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Interpolation for Median Household Income</span><span class="se">\n</span><span class="s2"> in Harris County using inverse weighted distance</span><span class="se">\n</span><span class="s2">after removing outliers&quot;</span><span class="p">)</span>
 
 <span class="n">new_plot</span>
@@ -23026,7 +23118,7 @@ EEAgXAECpHDHhp4hgAACCCCAAAIIIICAZ4H/DzjIX7C+AuAiAAAAAElFTkSuQmCC"
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>After removing outliers, the interpolation becomes much smoother. However, is it really better than including outliers?</p>
-<p>This question is arguable. When the targets that we are interested in are those outliers or related to those outliers, including them might not be a bad idea. However, if we are more interested in the general picture, not specific patterns, then removing outliers will be a better choice.</p>
+<p>This question is arguable. When the targets that we are interested in are those outliers or related to those outliers, including them might not be a bad idea. However, if we are more interested in the general picture, not specific patterns for the extreme values, then removing outliers will be a better choice.</p>
 
 </div>
 </div>
@@ -23081,7 +23173,8 @@ EEAgXAECpHDHhp4hgAACCCCAAAIIIICAZ4H/DzjIX7C+AuAiAAAAAElFTkSuQmCC"
 <span class="n">mmhi_vgm_exp</span> <span class="o">&lt;-</span> <span class="n">gstat</span><span class="p">::</span><span class="n">fit</span><span class="o">.</span><span class="n">variogram</span><span class="p">(</span><span class="n">harris_vgm_rm_ol</span><span class="p">,</span> 
                                      <span class="n">model</span> <span class="o">=</span> <span class="n">gstat</span><span class="p">::</span><span class="n">vgm</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span>  <span class="s2">&quot;Exp&quot;</span><span class="p">))</span>
 <span class="k">print</span><span class="p">(</span><span class="n">mmhi_vgm_exp</span><span class="p">)</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">harris_vgm_rm_ol</span><span class="p">,</span> <span class="n">mmhi_vgm_exp</span><span class="p">,</span> 
+<span class="n">plot</span><span class="p">(</span><span class="n">harris_vgm_rm_ol</span><span class="p">,</span> 
+     <span class="n">mmhi_vgm_exp</span><span class="p">,</span> 
      <span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;Exponential Model for Median Household Income after removing outliers&quot;</span><span class="p">,</span> 
      <span class="n">pch</span> <span class="o">=</span> <span class="mi">16</span><span class="p">)</span>
 </pre></div>
@@ -27932,7 +28025,7 @@ AAEEEEAAAQQQQACBeAj8f8UqZqjK8Fy6AAAAAElFTkSuQmCC"
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Using ordinary kriging, fitting model with changing direction in plane (x,y) in positive 45 or 90 degrees clockwise from positive y (North) seems to be the best. (Both Spherical Model and Exponential Model)</p>
 <p>Based on these conclusion, we can use the conclusion we got last time for interpolation.</p>
-<p>For Vignette purpose, only model with changing direction in plane (x,y) in positive 45 degrees clockwise from positive y (North) will be used.</p>
+<p>For the purpose of this vignette, only model with changing direction in plane (x,y) in positive 45 degrees clockwise from positive y (North) will be used.</p>
 
 </div>
 </div>
@@ -28013,21 +28106,25 @@ AAEEEEAAAQQQQACBeAj8f8UqZqjK8Fy6AAAAAElFTkSuQmCC"
 
 <span class="n">krig_sph_plot</span> <span class="o">&lt;-</span> <span class="n">ggplot</span><span class="p">()</span> <span class="o">+</span> 
   <span class="n">geom_tile</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">krig_sph</span><span class="o">.</span><span class="n">output</span> <span class="o">%&gt;%</span>
-            <span class="n">rename</span><span class="p">(</span><span class="sb">`Estimated Median Household Income`</span><span class="o">=</span><span class="n">var1</span><span class="o">.</span><span class="n">pred</span><span class="p">),</span> 
-            <span class="n">aes</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x2</span><span class="p">,</span> <span class="n">fill</span> <span class="o">=</span> <span class="sb">`Estimated Median Household Income`</span><span class="p">))</span> <span class="o">+</span> 
+            <span class="n">rename</span><span class="p">(</span><span class="sb">`Estimated Median Household Income`</span> <span class="o">=</span> <span class="n">var1</span><span class="o">.</span><span class="n">pred</span><span class="p">),</span> 
+            <span class="n">aes</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">x1</span><span class="p">,</span> 
+                <span class="n">y</span> <span class="o">=</span> <span class="n">x2</span><span class="p">,</span> 
+                <span class="n">fill</span> <span class="o">=</span> <span class="sb">`Estimated Median Household Income`</span><span class="p">))</span> <span class="o">+</span> 
   <span class="c1">#scale_fill_distiller(palette = &quot;Spectral&quot;, direction = 1) +</span>
-  <span class="n">scale_fill_gradient</span><span class="p">(</span><span class="n">low</span> <span class="o">=</span> <span class="s2">&quot;plum1&quot;</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="s2">&quot;purple4&quot;</span><span class="p">,</span> 
+  <span class="n">scale_fill_gradient</span><span class="p">(</span><span class="n">low</span> <span class="o">=</span> <span class="s2">&quot;plum1&quot;</span><span class="p">,</span> 
+                      <span class="n">high</span> <span class="o">=</span> <span class="s2">&quot;purple4&quot;</span><span class="p">,</span> 
                       <span class="n">breaks</span> <span class="o">=</span> <span class="n">quantile</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean_rm_ol</span><span class="nd">@data</span><span class="err">$</span><span class="n">MedHHinc</span><span class="p">),</span>
-                      <span class="n">labels</span><span class="o">=</span><span class="n">c</span><span class="p">(</span><span class="s2">&quot;Very Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Medium&quot;</span><span class="p">,</span> <span class="s2">&quot;High&quot;</span><span class="p">,</span> <span class="s2">&quot;Very High&quot;</span><span class="p">))</span> <span class="o">+</span>
+                      <span class="n">labels</span> <span class="o">=</span> <span class="n">c</span><span class="p">(</span><span class="s2">&quot;Very Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Medium&quot;</span><span class="p">,</span> <span class="s2">&quot;High&quot;</span><span class="p">,</span> <span class="s2">&quot;Very High&quot;</span><span class="p">))</span> <span class="o">+</span>
   <span class="n">theme_bw</span><span class="p">()</span>  <span class="o">+</span>
   <span class="n">coord_equal</span><span class="p">()</span> 
 
 <span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span> <span class="o">&lt;-</span> <span class="n">ggplot2</span><span class="p">::</span><span class="n">fortify</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
-<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span> <span class="o">&lt;-</span> <span class="n">merge</span><span class="p">(</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span><span class="p">,</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span> <span class="o">&lt;-</span> <span class="n">merge</span><span class="p">(</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span><span class="p">,</span> 
+                              <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
 <span class="n">new_plot</span> <span class="o">&lt;-</span> <span class="n">krig_sph_plot</span> <span class="o">+</span>
-  <span class="n">geom_path</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span><span class="p">,</span> 
+  <span class="n">geom_path</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span><span class="p">,</span> 
             <span class="n">aes</span><span class="p">(</span><span class="nb">long</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">),</span> 
             <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span> <span class="o">+</span>
   <span class="n">theme</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">(),</span> 
@@ -31778,7 +31875,7 @@ iiBAgAABAgQIECBAoCHgIDV21IIAAQIECBAgQIAAgYPAAJImjyjtdEw4AAAAAElFTkSuQmCC
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Looks far better than IDW!</p>
+<p>Looks far better than IDW! Comparing to the original map, it shows the similar information. For example, we can tell from this map that the income of those people living in the northern west is higher than those people living in the middle north.</p>
 
 </div>
 </div>
@@ -31811,7 +31908,7 @@ iiBAgAABAgQIECBAoCHgIDV21IIAAQIECBAgQIAAgYPAAJImjyjtdEw4AAAAAElFTkSuQmCC
                                       <span class="n">model</span> <span class="o">=</span> <span class="n">gstat</span><span class="p">::</span><span class="n">vgm</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span>  <span class="s2">&quot;Exp&quot;</span><span class="p">))</span>
 
 <span class="c1"># using &quot;grid&quot; as new data</span>
-<span class="n">census_grid</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">spsample</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span>
+<span class="n">census_grid</span> <span class="o">&lt;-</span> <span class="n">sp</span><span class="p">::</span><span class="n">spsample</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span>
                             <span class="mi">10000</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;regular&quot;</span><span class="p">)</span>
 <span class="n">gridded</span><span class="p">(</span><span class="n">census_grid</span><span class="p">)</span> <span class="o">&lt;-</span> <span class="n">TRUE</span>
 <span class="n">proj4string</span><span class="p">(</span><span class="n">census_grid</span><span class="p">)</span> <span class="o">&lt;-</span> <span class="n">proj4string</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris</span><span class="p">)</span>
@@ -31860,22 +31957,30 @@ iiBAgAABAgQIECBAoCHgIDV21IIAAQIECBAgQIAAgYPAAJImjyjtdEw4AAAAAElFTkSuQmCC
 <span class="n">krig_exp_plot</span> <span class="o">&lt;-</span> <span class="n">ggplot</span><span class="p">()</span> <span class="o">+</span> 
   <span class="n">geom_tile</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">krig_exp</span><span class="o">.</span><span class="n">output</span> <span class="o">%&gt;%</span>
             <span class="n">rename</span><span class="p">(</span><span class="sb">`Estimated Median Household Income`</span><span class="o">=</span><span class="n">var1</span><span class="o">.</span><span class="n">pred</span><span class="p">),</span> 
-            <span class="n">aes</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x2</span><span class="p">,</span> <span class="n">fill</span> <span class="o">=</span> <span class="sb">`Estimated Median Household Income`</span><span class="p">))</span> <span class="o">+</span> 
+            <span class="n">aes</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">x1</span><span class="p">,</span> 
+                <span class="n">y</span> <span class="o">=</span> <span class="n">x2</span><span class="p">,</span> 
+                <span class="n">fill</span> <span class="o">=</span> <span class="sb">`Estimated Median Household Income`</span><span class="p">))</span> <span class="o">+</span> 
   <span class="c1">#scale_fill_distiller(palette = &quot;Spectral&quot;, direction = 1) +</span>
-  <span class="n">scale_fill_gradient</span><span class="p">(</span><span class="n">low</span> <span class="o">=</span> <span class="s2">&quot;plum1&quot;</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="s2">&quot;purple4&quot;</span><span class="p">,</span> 
+  <span class="n">scale_fill_gradient</span><span class="p">(</span><span class="n">low</span> <span class="o">=</span> <span class="s2">&quot;plum1&quot;</span><span class="p">,</span> 
+                      <span class="n">high</span> <span class="o">=</span> <span class="s2">&quot;purple4&quot;</span><span class="p">,</span> 
                       <span class="n">breaks</span> <span class="o">=</span> <span class="n">quantile</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean_rm_ol</span><span class="nd">@data</span><span class="err">$</span><span class="n">MedHHinc</span><span class="p">),</span>
-                      <span class="n">labels</span><span class="o">=</span><span class="n">c</span><span class="p">(</span><span class="s2">&quot;Very Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Medium&quot;</span><span class="p">,</span> <span class="s2">&quot;High&quot;</span><span class="p">,</span> <span class="s2">&quot;Very High&quot;</span><span class="p">))</span> <span class="o">+</span>
+                      <span class="n">labels</span> <span class="o">=</span> <span class="n">c</span><span class="p">(</span><span class="s2">&quot;Very Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Low&quot;</span><span class="p">,</span> <span class="s2">&quot;Medium&quot;</span><span class="p">,</span> <span class="s2">&quot;High&quot;</span><span class="p">,</span> <span class="s2">&quot;Very High&quot;</span><span class="p">))</span> <span class="o">+</span>
   <span class="n">theme_bw</span><span class="p">()</span>  <span class="o">+</span>
   <span class="n">coord_equal</span><span class="p">()</span> 
 
-<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span> <span class="o">&lt;-</span> <span class="n">ggplot2</span><span class="p">::</span><span class="n">fortify</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span> <span class="o">&lt;-</span> <span class="n">ggplot2</span><span class="p">::</span><span class="n">fortify</span><span class="p">(</span><span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="p">,</span> 
+                                   <span class="n">region</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
-<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span> <span class="o">&lt;-</span> <span class="n">merge</span><span class="p">(</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span><span class="p">,</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+<span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span> <span class="o">&lt;-</span> <span class="n">merge</span><span class="p">(</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy</span><span class="p">,</span> <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean</span><span class="nd">@data</span><span class="p">,</span> 
+                              <span class="n">by</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
 <span class="n">new_plot</span> <span class="o">&lt;-</span> <span class="n">krig_exp_plot</span> <span class="o">+</span>
-  <span class="n">geom_path</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span><span class="p">,</span> <span class="n">aes</span><span class="p">(</span><span class="nb">long</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">),</span> 
-            <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span> <span class="o">+</span>
-  <span class="n">theme</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">(),</span> <span class="n">axis</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">())</span> <span class="o">+</span>
+  <span class="n">geom_path</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">HarrisCty</span><span class="o">.</span><span class="n">tidy_merge</span><span class="p">,</span> 
+            <span class="n">aes</span><span class="p">(</span><span class="nb">long</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">),</span> 
+            <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span> 
+            <span class="n">size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span> <span class="o">+</span>
+  <span class="n">theme</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">(),</span> 
+        <span class="n">axis</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">element_blank</span><span class="p">())</span> <span class="o">+</span>
   <span class="n">labs</span><span class="p">(</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Interpolation for Median Household Income</span><span class="se">\n</span><span class="s2"> in Harris County with kriging (exponential)</span><span class="se">\n</span><span class="s2">after removing outliers&quot;</span><span class="p">)</span>
 
 <span class="n">new_plot</span>
@@ -35606,6 +35711,15 @@ tDsJECBAgAABAgQIEEgBgZREBgQIECBAgAABAgQIvAgMUsYkmgF5ZJkAAAAASUVORK5CYII="
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>Except for Exponential and Spherical models, there are a lot more of different models such as Linear, Gaussian, Wave or Matern, etc.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Reference">Reference<a class="anchor-link" href="#Reference">&#182;</a></h1><p>American Community Survey (ACS) 2010. Urban Data Platform, Kinder Institute for Urban Research. <a href="https://www.kinderudp.org/#/datasetCatalog/8koe0a2ka4qb">https://www.kinderudp.org/#/datasetCatalog/8koe0a2ka4qb</a></p>
 <p>SoS Notebook: An Interactive Multi-Language Data Analysis Environment. Bo Peng, Gao Wang, Jun Ma, Man Chong Leong, Chris Wakefield, James Melott, Yulun Chiu, Di Du, and John N. Weinstein, Bioinformatics, May 2018. doi: <a href="https://doi.org/10.1093/bioinformatics/bty405">https://doi.org/10.1093/bioinformatics/bty405</a></p>
 <p>Using R — Working with Geospatial Data (and ggplot2). Bethany Yollin <a href="http://mazamascience.com/WorkingWithData/?p=1494">http://mazamascience.com/WorkingWithData/?p=1494</a></p>
@@ -35625,7 +35739,52 @@ tDsJECBAgAABAgQIEEgBgZREBgQIECBAgAABAgQIvAgMUsYkmgF5ZJkAAAAASUVORK5CYII="
 
 
 
+
+<script>
+function toggle_source() {
+    var btn = document.getElementById("show_cells");
+    if (btn.checked) {
+        $('div.input').css('display', 'flex');
+        $('.hidden_content').show();
+        // this somehow does not work.
+        $('div.cell').css('padding', '5pt').css('border-width', '1pt');
+    } else {
+        $('div.input').hide();
+        $('.hidden_content').hide();
+        $('div.cell').css('padding', '0pt').css('border-width', '0pt');
+    }
+}
+
+function toggle_prompt() {
+    var btn = document.getElementById("show_prompt");
+    if (btn.checked) {
+        $('.output_prompt').show();
+        $('.input_prompt').show();
+        $('.output_area .prompt').show();
+    } else {
+        $('.output_prompt').hide();
+        $('.input_prompt').hide();
+        $('.output_area .prompt').hide();
+    }
+}
+
+function toggle_messages() {
+    var btn = document.getElementById("show_messages");
+    if (btn.checked) {
+        $('.sos_hint').show();
+        $('.output_stderr').show();
+    } else {
+        $('.output_stderr').hide();
+        $('.sos_hint').hide();
+    }
+}
+</script>
+
+
+
+
  
 
 
 </html>
+
