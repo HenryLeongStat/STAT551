@@ -12070,14 +12070,14 @@ function sortDataFrame(id, n, dtype) {
 <span class="n">library</span><span class="p">(</span><span class="s2">&quot;ggplot2&quot;</span><span class="p">)</span>
 
 <span class="c1"># read datasets</span>
-<span class="n">censusData_bg</span> <span class="o">&lt;-</span> <span class="n">data</span><span class="o">.</span><span class="n">table</span><span class="p">::</span><span class="n">fread</span><span class="p">(</span><span class="s2">&quot;/Users/manchongleong/Desktop/STAT551/Curated/Cen2010Harris_BG_v01.csv&quot;</span><span class="p">,</span>
+<span class="n">censusData_bg</span> <span class="o">&lt;-</span> <span class="n">data</span><span class="o">.</span><span class="n">table</span><span class="p">::</span><span class="n">fread</span><span class="p">(</span><span class="s2">&quot;./Curated/Cen2010Harris_BG_v01.csv&quot;</span><span class="p">,</span>
                     <span class="n">colClasses</span> <span class="o">=</span> <span class="n">c</span><span class="p">(</span><span class="n">GeoID10_bg</span><span class="o">=</span><span class="s2">&quot;chatacher&quot;</span><span class="p">,</span>
                                    <span class="n">stfips</span><span class="o">=</span><span class="s2">&quot;character&quot;</span><span class="p">,</span>
                                    <span class="n">county</span><span class="o">=</span><span class="s2">&quot;character&quot;</span><span class="p">,</span>
                                    <span class="n">tract</span><span class="o">=</span><span class="s2">&quot;character&quot;</span><span class="p">))</span> <span class="o">%&gt;%</span>
   <span class="n">dplyr</span><span class="p">::</span><span class="n">rename</span><span class="p">(</span><span class="n">GEOID10</span><span class="o">=</span><span class="n">GeoID10_bg</span><span class="p">)</span>
 <span class="c1"># read census boundary</span>
-<span class="n">censusBoundary</span> <span class="o">&lt;-</span> <span class="n">rgdal</span><span class="p">::</span><span class="n">readOGR</span><span class="p">(</span><span class="n">dsn</span><span class="o">=</span><span class="s2">&quot;/Users/manchongleong/Desktop/STAT551/&quot;</span><span class="p">,</span> 
+<span class="n">censusBoundary</span> <span class="o">&lt;-</span> <span class="n">rgdal</span><span class="p">::</span><span class="n">readOGR</span><span class="p">(</span><span class="n">dsn</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> 
                           <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;tl_2010_48_bg10&quot;</span><span class="p">)</span>
 <span class="c1"># only get the records in Harris County</span>
 <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris</span> <span class="o">&lt;-</span> <span class="n">censusBoundary</span><span class="p">[</span><span class="n">grepl</span><span class="p">(</span><span class="n">c</span><span class="p">(</span><span class="s2">&quot;201&quot;</span><span class="p">),</span>
@@ -23330,10 +23330,6 @@ QAABBBBAAAEEIiHwf0eTYWKZVXiEAAAAAElFTkSuQmCC"
                                      <span class="n">censusBoundary</span><span class="o">.</span><span class="n">harris_clean_rm_ol</span><span class="p">,</span> 
                                      <span class="n">alpha</span> <span class="o">=</span> <span class="n">c</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">135</span><span class="p">))</span>
 
-<span class="c1">#census_grid &lt;- sp::spsample(x=censusBoundary, bb=bbox_census, 10000, type=&quot;regular&quot;)</span>
-<span class="c1">#plot(MedHHinc_vgm_cloud, main = &quot;Variogram Cloud for MedHHinc&quot;, pch = 16)</span>
-
-<span class="c1">#Hisp_vgm &lt;- gstat::variogram(Hisp~long+lat, censusBoundary.harris)</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">harris_vgm</span><span class="p">,</span> 
      <span class="n">main</span> <span class="o">=</span> <span class="s2">&quot;Variogram for log Median Hold income&quot;</span><span class="p">,</span> <span class="n">pch</span> <span class="o">=</span> <span class="mi">16</span><span class="p">)</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">harris_vgm_rm_ol</span><span class="p">,</span> 
